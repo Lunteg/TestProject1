@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -10,7 +10,7 @@ using OpenQA.Selenium.Support.UI;
 
 namespace AutomatedTests
 {
-    public class Tests
+    public class RicherSoundsTests
     {
         IWebDriver driver;
 
@@ -18,13 +18,15 @@ namespace AutomatedTests
         public void Setup()
         {
             driver = new ChromeDriver();
-            // развернуть окно браузера
             driver.Manage().Window.Maximize();
-            // неявное ожидание
+
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(7);
             driver.Navigate().GoToUrl("https://www.richersounds.com/");
             driver.FindElement(By.XPath("//button[@id='onetrust-accept-btn-handler']")).Click();
-            driver.FindElement(By.XPath("//aside[@aria-describedby='modal-content-8']//button[@data-role='closeBtn']")).Click();
+
+            IWebElement element = driver.FindElement(By.XPath("//div[@class='wrapper']"));
+            Actions actionProvider = new Actions(driver);
+            actionProvider.MoveByOffset(10, 20).Click().Build().Perform();
         }
 
         [Test]
@@ -34,7 +36,7 @@ namespace AutomatedTests
             driver.FindElement(By.XPath("//img[@title='Audio recorders']")).Click();
 
 
-            // левый и правый слайдер цен
+            // Р»РµРІС‹Р№ Рё РїСЂР°РІС‹Р№ СЃР»Р°Р№РґРµСЂ С†РµРЅ
             IWebElement left_slider = driver.FindElement(By.XPath("//div[@id='slider-range']/a[1]"));
             IWebElement right_slider = driver.FindElement(By.XPath("//div[@id='slider-range']/a[2]"));
 
@@ -43,65 +45,55 @@ namespace AutomatedTests
 
             int xCoord = left_slider.Location.X;
 
-            //двигаем ползуночек (фильтр цен)
             action.DragAndDropToOffset(left_slider, 50, 0);
             action.DragAndDropToOffset(right_slider, -30, 0);
             action.Build().Perform();
 
-            // применяем фильтр цен
             driver.FindElement(By.XPath("//button[@data-role='aw-layered-nav-price-submit']")).Click();
 
-            //прикол для того, чтобы считать строку со знаком фунта
             CultureInfo provider = new CultureInfo("en-GB");
             NumberStyles style = NumberStyles.Currency | NumberStyles.AllowCurrencySymbol;
 
 
-            new WebDriverWait(driver, TimeSpan.FromSeconds(3))
-                .Until(x => driver.FindElements(By.XPath("//span[@data-role='aw-layered-nav-price-label-from']")).Any());
-            new WebDriverWait(driver, TimeSpan.FromSeconds(3))
-                .Until(x => driver.FindElements(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Any());
+            driver.FindElements(By.XPath("//span[@data-role='aw-layered-nav-price-label-from']"));
+            driver.FindElements(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']"));
 
-            //кастуем в инт
+            //РєР°СЃС‚СѓРµРј РІ РёРЅС‚
             int minCost = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-from']")).Text.Trim(), style, provider);
             int maxCost = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Text.Trim(), style, provider);
-
 
             double[] actualValues = Array.ConvertAll(driver.FindElements(By.XPath("//div[@class='price-box price-final_price']//span[@class='price']"))
                .Select(webPrice => webPrice.Text).ToArray<string>(), s => double.Parse(s, style, provider));
             actualValues.ToList().ForEach(actualPrice => Assert.True(actualPrice >= minCost && actualPrice <= maxCost, "Price filter works wrong. Actual price is " + actualPrice + ". But should be more or equal than" + 500 + "and less or equal than" + 300));
-
         }
         [Test]
         public void TestTooltipText()
         {
-            driver.FindElement(By.XPath("//a[@id='ui-id-4']")).Click();
+            driver.FindElement(By.XPath("//a[@href='https://www.richersounds.com/tv-projectors.html' and @role='menuitem']")).Click();
             driver.FindElement(By.XPath("//img[@title='HDMI Cables']")).Click();
             driver.FindElement(By.XPath("//div[@class='products wrapper grid products-grid']//img[@class='product-image-photo']")).Click();
 
             new WebDriverWait(driver, TimeSpan.FromSeconds(3))
                 .Until(x => driver.FindElements(By.XPath("//button[@title='Add to Cart']")).Any());
-            //проверяем появилось ли значение, указанное в  title
+
             Assert.AreEqual("Add to Cart", driver.FindElement(By.XPath("//button[@title='Add to Cart']")).GetAttribute("title"), "Tooltip has not appeared.");
         }
         [Test]
         public void NegativeSignUpTest()
         {
-            // заходим в соответствующий раздел на сайте
-            driver.FindElement(By.XPath("//a[@class='authorization-link header-icon']")).Click();
-            //переходим к регестрации
-            driver.FindElement(By.XPath("//div[@class='item title left']")).Click();
+            // Р·Р°С…РѕРґРёРј РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ СЂР°Р·РґРµР» РЅР° СЃР°Р№С‚Рµ
+            driver.FindElement(By.XPath("//a[@href='https://www.richersounds.com/customer/account/login/']")).Click();
+            //РїРµСЂРµС…РѕРґРёРј Рє СЂРµРіРµСЃС‚СЂР°С†РёРё
+            driver.FindElement(By.XPath("//*[contains(text(), 'New to Richer Sounds?')]")).Click();
             driver.FindElement(By.Id("telephone")).SendKeys("+79841465720");
             driver.FindElement(By.Id("age-check")).Click();
-            //Console.WriteLine( driver.FindElement(By.Id("age-check")).Selected);
+
             driver.FindElement(By.Id("email_address")).SendKeys("vfbdhjsk57bs442@mail.ru");
             driver.FindElement(By.Id("password")).SendKeys("zK%N12Qb");
 
-            //пробуем создать аккаунт
             driver.FindElement(By.XPath("//button[@title='Create an Account']")).Click();
-            // проверяем, что выводится ошибка
             Assert.AreEqual("This is a required field.", driver.FindElement(By.Id("password-confirmation-error")).Text,
                 "registration is allowed in the absence of password confirmation.");
-
         }
 
         [TearDown]
