@@ -24,18 +24,18 @@ namespace AutomatedTests
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(7);
             driver.Navigate().GoToUrl("https://www.richersounds.com/");
             driver.FindElement(By.XPath("//button[@id='onetrust-accept-btn-handler']")).Click();
-            driver.FindElement(By.XPath("//button[@class='action-close']")).Click();
+            driver.FindElement(By.XPath("//aside[@aria-describedby='modal-content-8']//button[@data-role='closeBtn']")).Click();
         }
 
         [Test]
         public void TestPriceFilter()
         {
-            driver.FindElement(By.XPath("//a[@id='ui-id-3']")).Click();
+            driver.FindElement(By.XPath("//a[@href='https://www.richersounds.com/hi-fi.html' and @role = 'menuitem']")).Click();
             driver.FindElement(By.XPath("//img[@title='Audio recorders']")).Click();
 
 
             // левый и правый слайдер цен
-            IWebElement left_slider = driver.FindElement(By.XPath("//a[@class='ui-slider-handle ui-state-default ui-corner-all']"));
+            IWebElement left_slider = driver.FindElement(By.XPath("//div[@id='slider-range']/a[1]"));
             IWebElement right_slider = driver.FindElement(By.XPath("//div[@id='slider-range']/a[2]"));
 
             Actions action = new Actions(driver);
@@ -60,18 +60,15 @@ namespace AutomatedTests
                 .Until(x => driver.FindElements(By.XPath("//span[@data-role='aw-layered-nav-price-label-from']")).Any());
             new WebDriverWait(driver, TimeSpan.FromSeconds(3))
                 .Until(x => driver.FindElements(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Any());
-            //Console.WriteLine(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Text.Trim());
-            //кастуем в инт
-            int minCost_v = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-from']")).Text.Trim(), style, provider);
-            int maxCost_v = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Text.Trim(), style, provider);
-            //Console.WriteLine(maxCost_v);
-            //Console.WriteLine(maxCost_v);
 
-            //Console.WriteLine(double.Parse(driver.FindElement(By.XPath("//div[@class='price-box price-final_price']//span[@class='price']")).Text, style, provider));
+            //кастуем в инт
+            int minCost = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-from']")).Text.Trim(), style, provider);
+            int maxCost = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Text.Trim(), style, provider);
+
 
             double[] actualValues = Array.ConvertAll(driver.FindElements(By.XPath("//div[@class='price-box price-final_price']//span[@class='price']"))
                .Select(webPrice => webPrice.Text).ToArray<string>(), s => double.Parse(s, style, provider));
-            actualValues.ToList().ForEach(actualPrice => Assert.True(actualPrice >= minCost_v && actualPrice <= maxCost_v, "Price filter works wrong. Actual price is " + actualPrice + ". But should be more or equal than" + 500 + "and less or equal than" + 300));
+            actualValues.ToList().ForEach(actualPrice => Assert.True(actualPrice >= minCost && actualPrice <= maxCost, "Price filter works wrong. Actual price is " + actualPrice + ". But should be more or equal than" + 500 + "and less or equal than" + 300));
 
         }
         [Test]
