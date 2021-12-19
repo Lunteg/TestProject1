@@ -18,9 +18,9 @@ namespace AutomatedTests
         public void Setup()
         {
             driver = new ChromeDriver();
-            // развернуть окно браузера
+            // СЂР°Р·РІРµСЂРЅСѓС‚СЊ РѕРєРЅРѕ Р±СЂР°СѓР·РµСЂР°
             driver.Manage().Window.Maximize();
-            // неявное ожидание
+            // РЅРµСЏРІРЅРѕРµ РѕР¶РёРґР°РЅРёРµ
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(7);
             driver.Navigate().GoToUrl("https://www.richersounds.com/");
             driver.FindElement(By.XPath("//button[@id='onetrust-accept-btn-handler']")).Click();
@@ -34,7 +34,7 @@ namespace AutomatedTests
             driver.FindElement(By.XPath("//img[@title='Audio recorders']")).Click();
 
 
-            // левый и правый слайдер цен
+            // Р»РµРІС‹Р№ Рё РїСЂР°РІС‹Р№ СЃР»Р°Р№РґРµСЂ С†РµРЅ
             IWebElement left_slider = driver.FindElement(By.XPath("//div[@id='slider-range']/a[1]"));
             IWebElement right_slider = driver.FindElement(By.XPath("//div[@id='slider-range']/a[2]"));
 
@@ -43,15 +43,15 @@ namespace AutomatedTests
 
             int xCoord = left_slider.Location.X;
 
-            //двигаем ползуночек (фильтр цен)
+            //РґРІРёРіР°РµРј РїРѕР»Р·СѓРЅРѕС‡РµРє (С„РёР»СЊС‚СЂ С†РµРЅ)
             action.DragAndDropToOffset(left_slider, 50, 0);
             action.DragAndDropToOffset(right_slider, -30, 0);
             action.Build().Perform();
 
-            // применяем фильтр цен
+            // РїСЂРёРјРµРЅСЏРµРј С„РёР»СЊС‚СЂ С†РµРЅ
             driver.FindElement(By.XPath("//button[@data-role='aw-layered-nav-price-submit']")).Click();
 
-            //прикол для того, чтобы считать строку со знаком фунта
+            //РїСЂРёРєРѕР» РґР»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ СЃС‡РёС‚Р°С‚СЊ СЃС‚СЂРѕРєСѓ СЃРѕ Р·РЅР°РєРѕРј С„СѓРЅС‚Р°
             CultureInfo provider = new CultureInfo("en-GB");
             NumberStyles style = NumberStyles.Currency | NumberStyles.AllowCurrencySymbol;
 
@@ -61,7 +61,7 @@ namespace AutomatedTests
             new WebDriverWait(driver, TimeSpan.FromSeconds(3))
                 .Until(x => driver.FindElements(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Any());
 
-            //кастуем в инт
+            //РєР°СЃС‚СѓРµРј РІ РёРЅС‚
             int minCost = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-from']")).Text.Trim(), style, provider);
             int maxCost = int.Parse(driver.FindElement(By.XPath("//span[@data-role='aw-layered-nav-price-label-to']")).Text.Trim(), style, provider);
 
@@ -80,25 +80,25 @@ namespace AutomatedTests
 
             new WebDriverWait(driver, TimeSpan.FromSeconds(3))
                 .Until(x => driver.FindElements(By.XPath("//button[@title='Add to Cart']")).Any());
-            //проверяем появилось ли значение, указанное в  title
+            //РїСЂРѕРІРµСЂСЏРµРј РїРѕСЏРІРёР»РѕСЃСЊ Р»Рё Р·РЅР°С‡РµРЅРёРµ, СѓРєР°Р·Р°РЅРЅРѕРµ РІ  title
             Assert.AreEqual("Add to Cart", driver.FindElement(By.XPath("//button[@title='Add to Cart']")).GetAttribute("title"), "Tooltip has not appeared.");
         }
         [Test]
         public void NegativeSignUpTest()
         {
-            // заходим в соответствующий раздел на сайте
+            // Р·Р°С…РѕРґРёРј РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ СЂР°Р·РґРµР» РЅР° СЃР°Р№С‚Рµ
             driver.FindElement(By.XPath("//a[@class='authorization-link header-icon']")).Click();
-            //переходим к регестрации
+            //РїРµСЂРµС…РѕРґРёРј Рє СЂРµРіРµСЃС‚СЂР°С†РёРё
             driver.FindElement(By.XPath("//div[@class='item title left']")).Click();
             driver.FindElement(By.Id("telephone")).SendKeys("+79841465720");
             driver.FindElement(By.Id("age-check")).Click();
-            //Console.WriteLine( driver.FindElement(By.Id("age-check")).Selected);
+            
             driver.FindElement(By.Id("email_address")).SendKeys("vfbdhjsk57bs442@mail.ru");
             driver.FindElement(By.Id("password")).SendKeys("zK%N12Qb");
 
-            //пробуем создать аккаунт
+            //РїСЂРѕР±СѓРµРј СЃРѕР·РґР°С‚СЊ Р°РєРєР°СѓРЅС‚
             driver.FindElement(By.XPath("//button[@title='Create an Account']")).Click();
-            // проверяем, что выводится ошибка
+            // РїСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІС‹РІРѕРґРёС‚СЃСЏ РѕС€РёР±РєР°
             Assert.AreEqual("This is a required field.", driver.FindElement(By.Id("password-confirmation-error")).Text,
                 "registration is allowed in the absence of password confirmation.");
 
